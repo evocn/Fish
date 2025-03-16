@@ -105,6 +105,12 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
 
                 // Development keybinds
                 {
+                    if event.key.keysym.sym == SDLK_x {
+                        genocide(*game);
+                        seed := generate_seed();
+                        populate(*game, seed);
+                    }
+
                     /*
                     if event.key.keysym.sym == SDLK_r {
                         if program_state.current_scene == {

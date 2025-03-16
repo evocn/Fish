@@ -14,6 +14,7 @@ render :: (game: Game, menu: Menu) {
             case .TITLE;
                 draw_title_screen();
                 draw_version_indicator();
+                draw_controls();
 
             case .GAME;
                 draw_game(game);
@@ -21,8 +22,9 @@ render :: (game: Game, menu: Menu) {
 
             case .MENU;
                 draw_menu(menu);
-                draw_version_indicator();
                 draw_title_screen();
+                draw_version_indicator();
+                draw_controls();
 
             case .EDITOR;
                 draw_game(game);
@@ -117,7 +119,7 @@ draw_mouse_cursor :: (position : Pair, cursor_state: Cursor_State) {
 
 draw_title_screen :: () {
     draw_text(
-        "June's Fish Tank",
+        "Fish Tank",
         x = PIXEL_WIDTH - 10,
         y = 80,
         alignment   = Alignment.RIGHT,
@@ -127,7 +129,7 @@ draw_title_screen :: () {
     );
 
     draw_text(
-        "A dream fulfilled!",
+        "Showcase mode",
         x = PIXEL_WIDTH - 10,
         y = 60,
         alignment   = Alignment.RIGHT,
@@ -137,7 +139,7 @@ draw_title_screen :: () {
     );
 
     draw_text(
-        "December 27, 2024",
+        "March 2025",
         x = PIXEL_WIDTH - 10,
         y = 40,
         alignment   = Alignment.RIGHT,
@@ -156,6 +158,38 @@ draw_version_indicator :: () {
         progress = -1,
         font = .SMALL,
         color = green,
+    );
+}
+
+draw_controls :: () {
+    draw_text(
+        "Mouse to select",
+        x = 3,
+        y = 30,
+        alignment   = Alignment.LEFT,
+        progress    = -1,
+        font        = .SMALL,
+        color       = gray,
+    );
+
+    draw_text(
+        "A/W/D + click for interaction",
+        x = 3,
+        y = 20,
+        alignment   = Alignment.LEFT,
+        progress    = -1,
+        font        = .SMALL,
+        color       = gray,
+    );
+
+    draw_text(
+        "click to start!",
+        x = 3,
+        y = 10,
+        alignment   = Alignment.LEFT,
+        progress    = -1,
+        font        = .SMALL,
+        color       = white,
     );
 }
 

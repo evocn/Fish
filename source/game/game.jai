@@ -1530,12 +1530,14 @@ initialize :: (game: *Game) {
             array_add(*game.guys, turtle);
             array_add(*game.guys, axolotl);
 
+            /*
             // v1.1
             array_add(*game.guys, star);
             array_add(*game.guys, dumbo);
             array_add(*game.guys, narwhal);
             array_add(*game.guys, angler);
             array_add(*game.guys, blob);
+            */
         }
 
         /*
@@ -1555,8 +1557,8 @@ initialize :: (game: *Game) {
         genocide(game);
 
         seed := generate_seed_from_date_and_hour();
-        //populate(game, seed);
-        populate_everyone(game);
+        populate(game, seed);
+        //populate_everyone(game);
     }
 }
 
