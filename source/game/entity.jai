@@ -9,7 +9,6 @@ Entity :: struct {
         PARTICLE_SYSTEM;
         TOY;
         FOOD;
-        JET;
     }
     kind : Kind;        @NoSerialize
 
@@ -33,7 +32,6 @@ new_entity :: (kind : Entity.Kind) -> *Entity {
         case .PARTICLE_SYSTEM;  new_entity = xx New(Particle_System);
         case .TOY;              new_entity = xx New(Toy);
         case .FOOD;             new_entity = xx New(Food);
-        case .JET;              new_entity = xx New(Jet);
     }
 
     initialize(new_entity);
@@ -52,7 +50,6 @@ initialize :: (entity: *Entity) {
         case .PARTICLE_SYSTEM;  initialize(cast(*Particle_System)entity);
         case .TOY;              initialize(cast(*Toy)entity);
         case .FOOD;             initialize(cast(*Food)entity);
-        case .JET;              initialize(cast(*Jet)entity);
     }
 
 
@@ -66,7 +63,6 @@ update :: (entity: *Entity, dt: float) {
         case .PARTICLE_SYSTEM;  update(cast(*Particle_System)entity, dt);
         case .TOY;              update(cast(*Toy)entity, dt);
         case .FOOD;             update(cast(*Food)entity, dt);
-        case .JET;              update(cast(*Jet)entity, dt);
     }
 }
 
@@ -77,7 +73,6 @@ draw :: (entity: *Entity) {
         case .PARTICLE_SYSTEM;  draw(cast(*Particle_System)entity);
         case .TOY;              draw(cast(*Toy)entity);
         case .FOOD;             draw(cast(*Food)entity);
-        case .JET;              draw(cast(*Jet)entity);
     }
 }
 
@@ -88,6 +83,6 @@ draw_debug :: (entity: *Entity) {
         case .PARTICLE_SYSTEM;  ;
         case .TOY;              draw_debug(cast(*Toy)entity);
         case .FOOD;             ;
-        case .JET;              draw_debug(cast(*Jet)entity);
     }
 }
+

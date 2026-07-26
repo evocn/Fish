@@ -12,8 +12,8 @@ save_tweaks_file :: (file_name : string) {
 
         print_to_builder(*builder, "fullscreen %\n", graphics_context.fullscreen);
 
-        print_to_builder(*builder, "sfx %\n", Sound_Player.mix_levels[Sound_Category.GENERAL_SFX]);
-        print_to_builder(*builder, "music %\n", Sound_Player.mix_levels[Sound_Category.MUSIC]);
+        print_to_builder(*builder, "sfx %\n", mix_levels[Sound_Category.GENERAL_SFX]);
+        print_to_builder(*builder, "music %\n", mix_levels[Sound_Category.MUSIC]);
     }
 
     full_path := tprint("%/%.tweaks", tweaks_path, file_name);
@@ -46,10 +46,10 @@ load_tweaks_file_and_apply_results :: (file_name : string) -> file_exists: bool 
                     set_screen_mode_according_to_fullscreen_variable();
 
                 case "sfx";
-                    Sound_Player.mix_levels[Sound_Category.GENERAL_SFX], successfully_parsed = parse_float(*right);
+                    mix_levels[Sound_Category.GENERAL_SFX], successfully_parsed = parse_float(*right);
 
                 case "music";
-                    Sound_Player.mix_levels[Sound_Category.MUSIC], successfully_parsed = parse_float(*right);
+                    mix_levels[Sound_Category.MUSIC], successfully_parsed = parse_float(*right);
             }
             if !successfully_parsed {
                 log_error("Problem parsing the tweaks file!\n");
@@ -71,6 +71,6 @@ apply_default_settings :: () {
     set_screen_mode_according_to_fullscreen_variable();
 
     default_mix :: float.[1.0, 1.0, 1.0, 1.0, 1.0];
-    Sound_Player.mix_levels[Sound_Category.GENERAL_SFX] = default_mix[Sound_Category.GENERAL_SFX];
-    Sound_Player.mix_levels[Sound_Category.MUSIC]       = default_mix[Sound_Category.MUSIC];
+    mix_levels[Sound_Category.GENERAL_SFX] = default_mix[Sound_Category.GENERAL_SFX];
+    mix_levels[Sound_Category.MUSIC]       = default_mix[Sound_Category.MUSIC];
 }

@@ -3,7 +3,7 @@
 // February 2024
 
 apply_inputs_to_menu :: (menu: *Menu, input: Input) {
-    if input.start.just_pressed || input.b.just_pressed {
+    if input.start.just_pressed || input.east.just_pressed {
         return_to_prior_scene();
         play_sfx("click");
     }
@@ -31,7 +31,7 @@ apply_inputs_to_menu :: (menu: *Menu, input: Input) {
         play_sfx("click");
     }
 
-    if input.a.just_pressed {
+    if input.south.just_pressed {
         toggle_menu_element(menu.elements[menu.element_index]);
     }
 }
@@ -63,13 +63,13 @@ menu_initialize :: () -> Menu {
 
         sfx := New(Menu_Element_Slider,, a);
         sfx.name = "Sfx";
-        sfx.value = *Sound_Player.mix_levels[Sound_Category.GENERAL_SFX];
+        sfx.value = *mix_levels[Sound_Category.GENERAL_SFX];
         sfx.callback = null;
         array_add(*elements, cast(*Menu_Element)sfx);
 
         music := New(Menu_Element_Slider,, a);
         music.name = "Music";
-        music.value = *Sound_Player.mix_levels[Sound_Category.MUSIC];
+        music.value = *mix_levels[Sound_Category.MUSIC];
         music.callback = null;
         array_add(*elements, cast(*Menu_Element)music);
 

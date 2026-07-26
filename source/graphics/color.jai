@@ -18,7 +18,6 @@ orange  :: #run color_from_hex(0xFF7F50);
 blue    :: #run color_from_hex(0x067ab7);
 pink    :: #run color_from_hex(0xb869d3);
 teal    :: #run color_from_hex(0x1cc7d4);
-brown   :: #run color_from_hex(0x642d09);
 
 
 color_from_hex :: ($h: u32) -> Color {

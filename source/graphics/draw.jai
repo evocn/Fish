@@ -2,15 +2,11 @@
 // Graphics Drawing Functions
 // August 2024
 
-bottom_middle_of_collider :: (using collider : Collider) -> Pair {
-    return .{x + width / 2, y};
-}
-
 draw_sprite_relative_to_collider :: (
     using collider : Collider,
     sheet: string,
     frame := 0,
-    facing_left := false, facing_down := false
+    facing_left := false
 )
 {
     sprite := table_find_pointer(*graphics_context.sheets, sheet);
@@ -37,7 +33,6 @@ draw_sprite_relative_to_collider :: (
         scale_factor = scale,
 
         horizontal_flip = facing_left,
-        vertical_flip = facing_down,
 
         use_color_override = false,
     );
@@ -66,15 +61,13 @@ screen_pixel_zoom :: () -> zoom: int {
 
 // Entity
 draw_tile :: (tile: Tile, place : Pair) {
+    screen_position := world_space_to_screen_pixel(place.x, place.y);
     scale := screen_pixel_zoom();
-    screen_position := world_space_to_screen_pixel(place.x, place.y) + .{0, scale};
     draw_tile_at(tile, screen_position, scale);
 }
 
 draw_tile_at :: (tile: Tile, at: Pair, scale: int) {
-    if tile.sprite == "" then return;
-
-    sprite := table_find_pointer(*graphics_context.sheets, tile.sprite);
+    sprite := table_find_pointer(*graphics_context.sheets, "fishes");
     if !sprite {
         log_error("Couldn't load tile spritesheet.\n");
         return;
@@ -82,7 +75,7 @@ draw_tile_at :: (tile: Tile, at: Pair, scale: int) {
 
     draw_sprite(
         sprite,
-        frame = 0,
+        frame = tile.sprite,
         pixel = at,
 
         scale_factor = scale,
@@ -142,11 +135,8 @@ draw_clock_readout :: () {
         }
 
         hour_in_twelve_hour_time := hour;
-        if hour > 12 {
+        if hour_in_twelve_hour_time > 12 {
             hour_in_twelve_hour_time -= 12;
-        }
-        else if hour == 0 {
-            hour_in_twelve_hour_time = 12;
         }
 
         new_context := context;

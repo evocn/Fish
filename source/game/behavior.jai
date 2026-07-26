@@ -6,7 +6,7 @@
 
 Behavior :: struct {
     Kind :: enum {
-        ONE_SHOT;
+        REACT;
         SLEEP;
         EAT;
 
@@ -18,9 +18,6 @@ Behavior :: struct {
         BOUNCE;
         SPIN;
         JUMP;
-        FORWARD;
-
-        EIGHT_WAY;
 
         DEBUG;
     }
@@ -32,9 +29,9 @@ Behavior :: struct {
     bouncy_x : bool;
     bouncy_y : bool;
 
-    // Governing choice
+
+    // Variables governing choice.
     minimum_duration : float;
-    likelihood : float;
 
     // State
     time : float; @NoSerialize
@@ -44,8 +41,8 @@ Behavior :: struct {
 update :: (behavior: *Behavior, guy: *Guy, dt: float) {
     behavior.time += dt;
     if #complete behavior.kind == {
-        case .ONE_SHOT;     update(cast(*Behavior_One_Shot)behavior,    guy, dt);
         case .SLEEP;        update(cast(*Behavior_Sleep)behavior,       guy, dt);
+        case .REACT;        update(cast(*Behavior_React)behavior,       guy, dt);
         case .EAT;          update(cast(*Behavior_Eat)behavior,         guy, dt);
         case .IDLE;         update(cast(*Behavior_Idle)behavior,        guy, dt);
         case .SWIM;         update(cast(*Behavior_Swim)behavior,        guy, dt);
@@ -55,8 +52,6 @@ update :: (behavior: *Behavior, guy: *Guy, dt: float) {
         case .BOUNCE;       update(cast(*Behavior_Bounce)behavior,      guy, dt);
         case .SPIN;         update(cast(*Behavior_Spin)behavior,        guy, dt);
         case .JUMP;         update(cast(*Behavior_Jump)behavior,        guy, dt);
-        case .FORWARD;      update(cast(*Behavior_Forward)behavior,     guy, dt);
-        case .EIGHT_WAY;    update(cast(*Behavior_Eight_Way)behavior,   guy, dt);
         case .DEBUG;        update(cast(*Behavior_Debug)behavior,       guy, dt);
     }
 }
@@ -68,7 +63,7 @@ start :: (behavior: *Behavior) {
     reset(*behavior.animation);
 
     if #complete behavior.kind == {
-        case .ONE_SHOT;     start(cast(*Behavior_One_Shot)behavior);
+        case .REACT;        start(cast(*Behavior_React)behavior);
         case .SLEEP;        start(cast(*Behavior_Sleep)behavior);
         case .EAT;          start(cast(*Behavior_Eat)behavior);
         case .IDLE;         start(cast(*Behavior_Idle)behavior);
@@ -79,8 +74,6 @@ start :: (behavior: *Behavior) {
         case .BOUNCE;       start(cast(*Behavior_Bounce)behavior);
         case .SPIN;         start(cast(*Behavior_Spin)behavior);
         case .JUMP;         start(cast(*Behavior_Jump)behavior);
-        case .FORWARD;      start(cast(*Behavior_Forward)behavior);
-        case .EIGHT_WAY;    start(cast(*Behavior_Eight_Way)behavior);
         case .DEBUG;        start(cast(*Behavior_Debug)behavior);
     }
 }
@@ -102,18 +95,15 @@ update :: (behavior: *Behavior_Sleep, guy: *Guy, dt: float) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Behavior_One_Shot :: struct {
+Behavior_React :: struct {
     using behavior: Behavior;
-    kind = .ONE_SHOT;
-
-    sfx : string;
+    kind = .REACT;
 }
 
-start :: (behavior: *Behavior_One_Shot) {
-    if behavior.sfx != "" then play_sfx(behavior.sfx);
+start :: (behavior: *Behavior_React) {
 }
 
-update :: (behavior: *Behavior_One_Shot, guy: *Guy, dt: float) {
+update :: (behavior: *Behavior_React, guy: *Guy, dt: float) {
     guy.animation = *behavior.animation;
     behavior.done = update(guy.animation, dt);
 }
@@ -204,8 +194,6 @@ Behavior_Swim :: struct {
     using behavior: Behavior;
     kind = .SWIM;
 
-    down_animation: Sprite_Animation;
-
     speed   : float = 8;
 
     period  : float = 2.0;
@@ -229,12 +217,7 @@ update :: (behavior: *Behavior_Swim, guy: *Guy, dt: float) {
         guy.velocity = normalize(behavior.wants_to_move_this_direction) * behavior.speed;
     }
 
-    if guy.velocity.y > 0 {
-        guy.animation = *behavior.animation;
-    }
-    else {
-        guy.animation = *behavior.down_animation;
-    }
+    guy.animation = *behavior.animation;
 
     update(guy.animation, dt);
 }
@@ -276,8 +259,7 @@ update :: (behavior: *Behavior_Swim_Upward, guy: *Guy, dt: float) {
 
     if guy.y >= game.level.pixel_extents.height - 16 then behavior.done = true;
 
-    animation_cycle_done := update(guy.animation, dt);
-    if animation_cycle_done then play_sfx("swim", volume = 0.5);
+    update(guy.animation, dt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -474,8 +456,6 @@ update :: (behavior: *Behavior_Jump, guy: *Guy, dt: float) {
                 if behavior.jumping_right then guy.velocity.x = random_horizontal_velocity;
                                           else guy.velocity.x = -1 * random_horizontal_velocity;
                 behavior.state = .LEAP;
-
-                play_sfx("jump");
             }
 
         case .LEAP;
@@ -508,86 +488,4 @@ update :: (behavior: *Behavior_Jump, guy: *Guy, dt: float) {
                 update(guy.animation, 0);
             }
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Behavior_Eight_Way :: struct {
-    using behavior: Behavior;
-    kind = .EIGHT_WAY;
-
-    diagonal_animation : Sprite_Animation;
-
-    speed   : float = 20.0;
-    period  : float = 5.0;
-
-    // State
-    time_this_direction: float; @NoSerialize
-    wants_to_move_this_direction: Vector2; @NoSerialize
-}
-
-start :: (behavior: *Behavior_Eight_Way) {
-    behavior.time_this_direction = 20.0;
-}
-
-update :: (behavior: *Behavior_Eight_Way, guy: *Guy, dt: float) {
-    behavior.time_this_direction += dt;
-
-    if behavior.time_this_direction > behavior.period {
-        behavior.time_this_direction = 0.0;
-        behavior.wants_to_move_this_direction = get_random_direction_vector_on_unit_circle();
-
-        vertical := behavior.wants_to_move_this_direction.x < 0.3 && behavior.wants_to_move_this_direction.x > -0.3;
-        if vertical then guy.animation = *behavior.animation;
-        else guy.animation = *behavior.diagonal_animation;
-
-        guy.velocity = normalize(behavior.wants_to_move_this_direction) * behavior.speed;
-    }
-
-    slowdown_factor := 1.0 / behavior.period;
-    {
-        {
-            positive := guy.velocity.x >= 0;
-            if positive then guy.velocity.x -= guy.velocity.x * slowdown_factor * dt;
-                        else guy.velocity.x += guy.velocity.x * slowdown_factor * dt;
-        }
-
-        {
-            positive := guy.velocity.y >= 0;
-            if positive then guy.velocity.y -= guy.velocity.y * slowdown_factor * dt;
-                        else guy.velocity.y += guy.velocity.y * slowdown_factor * dt;
-        }
-    }
-
-    update(guy.animation, dt);
-}
-
-get_random_direction_for_eight_way_swimming :: () -> Vector2 {
-    diagonals := Vector2.[.{1, 1}, .{1, -1}, .{-1, 1}, .{-1, -1}];
-    cardinals := Vector2.[.{1, 0}, .{0, 1}, .{-1, 0}, .{0, -1}];
-
-    direction : Vector2;
-    if random() < 0.5 then direction = random_choice(diagonals);
-    else direction = random_choice(cardinals);
-
-    return direction;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Behavior_Forward :: struct {
-    using behavior: Behavior;
-    kind = .FORWARD;
-
-    speed   : float = 20;
-}
-
-start :: (behavior: *Behavior_Forward) {
-}
-
-update :: (behavior: *Behavior_Forward, guy: *Guy, dt: float) {
-    if guy.velocity.x == 0 then guy.velocity.x = behavior.speed;
-
-    guy.animation = *behavior.animation;
-    update(guy.animation, dt);
 }

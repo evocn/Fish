@@ -14,7 +14,7 @@ draw_sprite :: (
                 pixel : Pair,
                 frame: int = 0,
                 scale_factor : int,
-                horizontal_flip := false, vertical_flip := false,
+                horizontal_flip := false,
                 use_color_override := false, color_override := white
                )
 {
@@ -51,7 +51,6 @@ draw_sprite :: (
 
 
     set_bool(shader, "horizontal_flip", horizontal_flip);
-    set_bool(shader, "vertical_flip", vertical_flip);
 
 
     // @TODO?

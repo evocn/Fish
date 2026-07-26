@@ -56,22 +56,8 @@ whats_next :: (guy: *Guy) -> behavior: *Behavior {
     using guy.personality;
 
     if #complete get_current_plan(schedule) == {
-        case .NEUTRAL;  return weighted_choice(neutral_behaviors);
+        case .NEUTRAL;  return random_choice(neutral_behaviors);
         case .SLEEP;    return sleep_behavior;
         case .EAT;      return eat_behavior;
     }
-}
-
-// Assumption: "behaviors" is an array with behaviors with their "Likelihood" fields adding up to 1.
-weighted_choice :: (behaviors: [] *Behavior) -> *Behavior {
-    roll := random();
-
-    running := 0.0;
-    for b : behaviors {
-        running += b.likelihood;
-        if running > roll then return b;
-    }
-
-    print("Somthing bad happened here with the weighted choice...\n");
-    return null;
 }

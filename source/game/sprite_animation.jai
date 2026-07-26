@@ -13,23 +13,6 @@ Sprite_Animation :: struct {
     t       : float;    @NoSerialize
 }
 
-make_animation :: (sheet: string, speed := 1.0) -> *Sprite_Animation {
-    sprite := table_find_pointer(*graphics_context.sheets, sheet);
-    if !sprite {
-        log_error("Couldn't load spritesheet % when loading animation.\n", sheet);
-        return null;
-    }
-
-    animation := New(Sprite_Animation);
-    {
-        animation.frame_count = sprite.columns * sprite.rows;
-        animation.sheet = sheet;
-        animation.speed = speed;
-    }
-
-    return animation;
-}
-
 reset :: (using animation : *Sprite_Animation) {
     frame = 0;
     t = 0;

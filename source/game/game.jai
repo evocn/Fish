@@ -19,7 +19,6 @@
 #load "entities/particle_system.jai";
 #load "entities/toy.jai";
 #load "entities/food.jai";
-#load "entities/jet.jai";
 
 #load "collisions/simulation.jai";
 
@@ -102,16 +101,6 @@ initialize :: (game: *Game) {
         particle_system : *Particle_System = xx new_entity(.PARTICLE_SYSTEM);
         {
             using particle_system;
-
-            one_shot = false;
-            lifetime_min = 1.0;
-            lifetime_max = 10.0;
-            initial_velocity_min = .{0, 10};
-            initial_velocity_max = .{0, 30};
-            initial_acceleration_min = .{0, 0};
-            initial_acceleration_max = .{0, -0.1};
-
-            custom_initializer = background_particle_initializer;
         }
         array_add(*game.entities, xx particle_system);
 
@@ -121,31 +110,21 @@ initialize :: (game: *Game) {
 
             name = "anchor";
 
-            x = 30;
-            y = 15;
+            x = 128;
+            y = 16;
             width  = 32;
             height = 32;
 
-            animation = make_animation("Anchor");
+            {
+                animation = New(Sprite_Animation);
+                {
+                    using animation;
+                    sheet = "Anchor";
+                    frame_count = 1;
+                }
+            }
         }
         array_add(*game.entities, xx toy);
-
-        /*
-        chest : *Toy = xx new_entity(.TOY);
-        {
-            using chest;
-
-            name = "chest";
-
-            x = 180;
-            y = 15;
-            width  = 16;
-            height = 16;
-
-            animation = make_animation("Chest");
-        }
-        array_add(*game.entities, xx chest);
-        */
 
         kelp : *Toy = xx new_entity(.TOY);
         {
@@ -153,16 +132,22 @@ initialize :: (game: *Game) {
 
             name = "kelp";
 
-            x = 64;
-            y = 11;
-            width  = 32;
-            height = 64;
+            x = 32;
+            y = 16;
+            width  = 16;
+            height = 16;
 
-            animation = make_animation("Seaweed");
+            {
+                animation = New(Sprite_Animation);
+                {
+                    using animation;
+                    sheet = "kelp";
+                    frame_count = 1;
+                }
+            }
         }
         array_add(*game.entities, xx kelp);
 
-        /*
         food : *Food = xx new_entity(.FOOD);
         {
             using food;
@@ -171,24 +156,9 @@ initialize :: (game: *Game) {
             y = 112;
         }
         array_add(*game.entities, xx food);
-        */
-
-        jet : *Jet = xx new_entity(.JET);
-        {
-            using jet;
-
-            z_index = -100;
-
-            x = 160;
-            y = 15;
-            width = 10;
-            height = 20;
-
-            animation = make_animation("Bubbles", speed = 10.0);
-        }
-        array_add(*game.entities, xx jet);
 
         // Load Guys
+
         frog : *Guy = xx new_entity(.GUY);
         {
             using frog;
@@ -205,27 +175,89 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Frog-Idle",     speed = 5.0);
-                walk := make_animation("Frog-Walk",     speed = 7.0);
-                sleep := make_animation("Frog-Sleep",   speed = 10.0);
-                shock := make_animation("Frog-Shock",   speed = 12.0);
-                heart := make_animation("Frog-Heart",   speed = 10.0);
-                swim := make_animation("Frog-Swim",     speed = 6.0);
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Frog-Idle";
+                    frame_count = 8;
+                    speed = 5.0;
+                }
 
-                charge := make_animation("Frog-Charge");
-                jump := make_animation("Frog-Jump",     speed = 30.0);
-                fly := make_animation("Frog-Fly");
-                land := make_animation("Frog-Land",     speed = 50.0);
+                walk := New(Sprite_Animation);
+                {
+                    using walk;
+                    sheet = "Frog-Walk";
+                    frame_count = 4;
+                    speed = 7;
+                }
 
-                animation = idle;
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Frog-Sleep";
+                    frame_count = 15;
+                    speed = 10.0;
+                }
 
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Frog-Shock";
+                    frame_count = 8;
+                    speed = 12.0;
+                }
+
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Frog-Heart";
+                    frame_count = 11;
+                    speed = 10.0;
+                }
+
+                swim := New(Sprite_Animation);
+                {
+                    using swim;
+                    sheet = "Frog-Swim";
+                    frame_count = 5;
+                    speed = 6.0;
+                }
+
+                jump := New(Sprite_Animation);
+                {
+                    using jump;
+                    sheet = "Frog-Jump";
+                    frame_count = 5;
+                    speed = 30.0;
+                }
+
+                charge := New(Sprite_Animation);
+                {
+                    using charge;
+                    sheet = "Frog-Charge";
+                    frame_count = 1;
+                }
+
+                fly := New(Sprite_Animation);
+                {
+                    using fly;
+                    sheet = "Frog-Fly";
+                    frame_count = 1;
+                }
+
+                land := New(Sprite_Animation);
+                {
+                    using land;
+                    sheet = "Frog-Land";
+                    frame_count = 7;
+                    speed = 50;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
                     b.minimum_duration = 5;
-                    b.likelihood = 0.2;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -238,7 +270,6 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
 
                     b.minimum_duration = 8;
-                    b.likelihood = 0.3;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -254,7 +285,6 @@ initialize :: (game: *Game) {
                     b.bouncy_y = false;
 
                     b.minimum_duration = 10;
-                    b.likelihood = 0.1;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -272,8 +302,6 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
                     b.bouncy_y = false;
 
-                    b.likelihood = 0.4;
-
                     array_add(*neutral_behaviors, xx b);
                 }
 
@@ -284,13 +312,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = shock;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = heart;
                 }
@@ -301,10 +329,12 @@ initialize :: (game: *Game) {
                     animation = idle;
                 }
 
+                animation = idle;
+
                 {
                     schedule.hours = Plan.[
                         .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .SLEEP,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
                         .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
                     ];
                 }
@@ -313,11 +343,12 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "6 years old.");
-                array_add(*facts, "has over 10,000 children!");
-                array_add(*facts, "");
-                array_add(*facts, "frog was the");
-                array_add(*facts, "first guy I made.");
+                array_add(*facts, "favorite food: fleas");
+                array_add(*facts, "can walk and swim");
+                array_add(*facts, "6 years old");
+                array_add(*facts, "has over 10,000 children");
+
+                quote = "ribbit";
 
                 color = green;
             }
@@ -339,22 +370,52 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Tako-Idle",     speed = 10.0);
-                walk := make_animation("Tako-Walk",     speed = 10.0);
-                swim := make_animation("Tako-Swim",     speed = 25.0);
-                sleep := make_animation("Tako-Sleep",   speed = 10.0);
-                shock := make_animation("Tako-Shock",   speed = 15.0);
-                heart := make_animation("Tako-Heart",   speed = 8.0);
 
-                animation = idle;
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Tako-Idle";
+                    frame_count = 9;
+                    speed = 10.0;
+                }
 
+                walk := New(Sprite_Animation);
+                {
+                    using walk;
+                    sheet = "Tako-Walk";
+                    frame_count = 7;
+                    speed = 10.0;
+                }
+
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Tako-Sleep";
+                    frame_count = 9;
+                    speed = 10.0;
+                }
+
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Tako-Shock";
+                    frame_count = 13;
+                    speed = 20.0;
+                }
+
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Tako-Heart";
+                    frame_count = 16;
+                    speed = 8.0;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.2;
+                    b.minimum_duration = 7;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -367,23 +428,6 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
 
                     b.minimum_duration = 15;
-                    b.likelihood = 0.4;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Swim_Upward);
-                    b.animation = swim;
-
-                    b.speed = 30.0;
-
-                    b.swimming = true;
-                    b.bouncy_x = true;
-                    b.bouncy_y = false;
-
-                    b.minimum_duration = 6;
-                    b.likelihood = 0.4;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -395,13 +439,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = shock;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = heart;
                 }
@@ -411,6 +455,8 @@ initialize :: (game: *Game) {
                     using eat_behavior;
                     animation = idle;
                 }
+
+                animation = idle;
 
                 {
                     schedule.hours = Plan.[
@@ -424,14 +470,13 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "A professional chef.");
-                array_add(*facts, "");
-                array_add(*facts, "favorite food: souffle.");
-                array_add(*facts, "least favorite: peas.");
-                array_add(*facts, "(but he will eat them");
-                array_add(*facts, "if they are on his plate.)");
+                array_add(*facts, "professional chef");
+                array_add(*facts, "favorite food: souffle");
+                array_add(*facts, "least favorite: peas");
 
-                color = red;
+                quote = "your order?";
+
+                color = green;
             }
         }
 
@@ -451,20 +496,43 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Clam-Idle");
-                sleep := make_animation("Clam-Sleep", speed = 2.0);
-                shock := make_animation("Clam-Shock", speed = 12.0);
-                heart := make_animation("Clam-Heart", speed = 10.0);
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Clam-Idle";
+                    frame_count = 1;
+                    speed = 1.0;
+                }
 
-                animation = idle;
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Clam-Sleep";
+                    frame_count = 2;
+                    speed = 1.2;
+                }
 
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Clam-Shock";
+                    frame_count = 20;
+                    speed = 15.0;
+                }
+
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Clam-Heart";
+                    frame_count = 4;
+                    speed = 10;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
-                    b.minimum_duration = 5;
-                    b.likelihood = 1.0;
+                    b.minimum_duration = 10;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -476,13 +544,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = shock;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = heart;
                 }
@@ -492,6 +560,8 @@ initialize :: (game: *Game) {
                     using eat_behavior;
                     animation = idle;
                 }
+
+                animation = idle;
 
                 {
                     schedule.hours = Plan.[
@@ -505,13 +575,14 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "A real homebody.");
-                array_add(*facts, "only comes out sometimes.");
-                array_add(*facts, "");
-                array_add(*facts, "I think she is watching");
-                array_add(*facts, "Gossip Girl in there.");
+                array_add(*facts, "a real homebody");
+                array_add(*facts, "only comes out sometimes");
+                array_add(*facts, "watches lots of movies");
+                array_add(*facts, "favorite movie: 'Rocky'");
 
-                color = white;
+                quote = "...";
+
+                color = purple;
             }
         }
 
@@ -523,30 +594,59 @@ initialize :: (game: *Game) {
 
             rarity = .COMMON;
 
-            x = 196;
+            x = 128;
             y = 16;
-            width  = 12;
-            height = 14;
+            width  = 16;
+            height = 16;
 
             {
                 using personality;
 
-                idle := make_animation("Jelly-Idle",    speed = 7.0);
-                walk := make_animation("Jelly-Walk",    speed = 10.0);
-                swim := make_animation("Jelly-Swim",    speed = 25.0);
-                sleep := make_animation("Jelly-Sleep",  speed = 10.0);
-                shock := make_animation("Jelly-Shock",  speed = 20.0);
-                heart := make_animation("Jelly-Heart",  speed = 10.0);
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Jelly-Idle";
+                    frame_count = 10;
+                    speed = 7.0;
+                }
 
-                animation = idle;
+                walk := New(Sprite_Animation);
+                {
+                    using walk;
+                    sheet = "Jelly-Walk";
+                    frame_count = 8;
+                    speed = 10.0;
+                }
 
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Jelly-Sleep";
+                    frame_count = 14;
+                    speed = 10.0;
+                }
+
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Jelly-Shock";
+                    frame_count = 5;
+                    speed = 20;
+                }
+
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Jelly-Heart";
+                    frame_count = 20;
+                    speed = 10.0;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.3;
+                    b.minimum_duration = 7;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -558,24 +658,7 @@ initialize :: (game: *Game) {
 
                     b.bouncy_x = true;
 
-                    b.minimum_duration = 10;
-                    b.likelihood = 0.4;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Swim_Upward);
-                    b.animation = swim;
-
-                    b.speed = 30.0;
-
-                    b.swimming = true;
-                    b.bouncy_x = true;
-                    b.bouncy_y = false;
-
-                    b.minimum_duration = 20;
-                    b.likelihood = 0.3;
+                    b.minimum_duration = 4;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -587,13 +670,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = shock;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = heart;
                 }
@@ -604,11 +687,13 @@ initialize :: (game: *Game) {
                     animation = idle;
                 }
 
+                animation = idle;
+
                 {
                     schedule.hours = Plan.[
                         .SLEEP, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                        .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .SLEEP,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
+                        .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL,
                     ];
                 }
             }
@@ -616,10 +701,10 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "would enjoy a hug,");
-                array_add(*facts, "but is extremely toxic.");
+                array_add(*facts, "sticky");
+                array_add(*facts, "don't get too close");
 
-                array_add(*facts, "don't get too close!");
+                quote = "zzt";
 
                 color = teal;
             }
@@ -641,15 +726,53 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Blowfish-Idle",     speed = 7.0);
-                walk := make_animation("Blowfish-Walk",     speed = 10.0);
-                bounce := make_animation("Blowfish-Bounce", speed = 10.0);
-                heart := make_animation("Blowfish-Happy",   speed = 10.0);
-                sleep := make_animation("Blowfish-Sleep",   speed = 10.0);
-                //shock := make_animation("Blowfish-Shock");
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Blowfish-Idle";
+                    frame_count = 8;
+                    speed = 7.0;
+                }
 
-                animation = idle;
+                walk := New(Sprite_Animation);
+                {
+                    using walk;
+                    sheet = "Blowfish-Walk";
+                    frame_count = 5;
+                    speed = 10.0;
+                }
 
+                bounce := New(Sprite_Animation);
+                {
+                    using bounce;
+                    sheet = "Blowfish-Bounce";
+                    frame_count = 20;
+                    speed = 10.0;
+                }
+
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Blowfish-Happy";
+                    frame_count = 10;
+                    speed = 10.0;
+                }
+
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Blowfish-Sleep";
+                    frame_count = 21;
+                    speed = 10.0;
+                }
+
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Blowfish-Shock";
+                    frame_count = 1;
+                    speed = 0.1;
+                }
 
                 {
                     b := New(Behavior_Wander);
@@ -662,8 +785,7 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
                     b.bouncy_y = true;
 
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.5;
+                    b.minimum_duration = 10;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -671,7 +793,6 @@ initialize :: (game: *Game) {
                 {
                     b := New(Behavior_Swim);
                     b.animation = walk;
-                    b.down_animation = walk;
 
                     b.speed = 25;
 
@@ -679,8 +800,7 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
                     b.bouncy_y = true;
 
-                    b.minimum_duration = 10;
-                    b.likelihood = 0.5;
+                    b.minimum_duration = 5;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -702,16 +822,14 @@ initialize :: (game: *Game) {
                     b.bouncy_x = true;
                     b.bouncy_y = true;
 
-                    b.minimum_duration = 3;
+                    b.minimum_duration = 5;
 
                     shock_behavior = xx b;
                 }
 
                 {
-                    b := New(Behavior_One_Shot);
+                    b := New(Behavior_React);
                     b.animation = heart;
-
-                    b.swimming = true;
 
                     heart_behavior = xx b;
                 }
@@ -723,11 +841,13 @@ initialize :: (game: *Game) {
                     eat_behavior = xx b;
                 }
 
+                animation = idle;
+
                 {
                     schedule.hours = Plan.[
                         .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL,
                     ];
                 }
             }
@@ -735,10 +855,12 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "curious, but cautious.");
-                array_add(*facts, "does not like surprises.");
-                array_add(*facts, "");
-                array_add(*facts, "often dreams of the ocean.");
+                array_add(*facts, "curious, but hesitant");
+                array_add(*facts, "does not like surprises");
+                array_add(*facts, "dreams of a trip someday");
+                array_add(*facts, "favorite person: June");
+
+                quote = "blub";
 
                 color = yellow;
             }
@@ -760,38 +882,53 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Blobfish-Idle",         speed = 1.0);
-                blink := make_animation("Blobfish-Blink",       speed = 10.0);
-                yawn := make_animation("Blobfish-OpenMouth",    speed = 10.0);
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Blobfish-Idle";
+                    frame_count = 1;
+                    speed = 0.0;
+                }
 
-                animation = idle;
+                blink := New(Sprite_Animation);
+                {
+                    using blink;
+                    sheet = "Blobfish-Blink";
+                    frame_count = 16;
+                    speed = 0.1;
+                }
+
+                yawn := New(Sprite_Animation);
+                {
+                    using yawn;
+                    sheet = "Blobfish-OpenMouth";
+                    frame_count = 40;
+                    speed = 0.1;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.9;
+                    b.minimum_duration = 100;
 
                     array_add(*neutral_behaviors, xx b);
                 }
 
                 {
-                    b := New(Behavior_One_Shot);
+                    b := New(Behavior_Idle);
                     b.animation = yawn;
 
-                    b.likelihood = 0.05;
-                    b.sfx = "yawning";
+                    b.minimum_duration = 10;
 
                     array_add(*neutral_behaviors, xx b);
                 }
 
                 {
-                    b := New(Behavior_One_Shot);
+                    b := New(Behavior_Idle);
                     b.animation = blink;
 
-                    b.likelihood = 0.05;
-                    b.sfx = "SimpleBlink";
+                    b.minimum_duration = 10;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -803,13 +940,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = idle;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = idle;
                 }
@@ -819,6 +956,8 @@ initialize :: (game: *Game) {
                     using eat_behavior;
                     animation = idle;
                 }
+
+                animation = idle;
 
                 {
                     schedule.hours = Plan.[
@@ -832,7 +971,9 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "???");
+                array_add(*facts, "?????????????????????????????????????");
+
+                quote = "???";
 
                 color = pink;
             }
@@ -854,21 +995,51 @@ initialize :: (game: *Game) {
             {
                 using personality;
 
-                idle := make_animation("Crab-Idle",     speed = 10.0);
-                walk := make_animation("Crab-Walk",     speed = 10.0);
-                heart := make_animation("Crab-Heart",   speed = 1.0);
-                shock := make_animation("Crab-Shock",   speed = 1.0);
-                sleep := make_animation("Crab-Sleep",   speed = 2.0);
+                idle := New(Sprite_Animation);
+                {
+                    using idle;
+                    sheet = "Crab-Idle";
+                    frame_count = 10;
+                    speed = 10;
+                }
 
-                animation = idle;
+                walk := New(Sprite_Animation);
+                {
+                    using walk;
+                    sheet = "Crab-Walk";
+                    frame_count = 4;
+                    speed = 10;
+                }
 
+                heart := New(Sprite_Animation);
+                {
+                    using heart;
+                    sheet = "Crab-Heart";
+                    frame_count = 1;
+                    speed = 1;
+                }
+
+                shock := New(Sprite_Animation);
+                {
+                    using shock;
+                    sheet = "Crab-Shock";
+                    frame_count = 1;
+                    speed = 1;
+                }
+
+                sleep := New(Sprite_Animation);
+                {
+                    using sleep;
+                    sheet = "Crab-Sleep";
+                    frame_count = 4;
+                    speed = 1;
+                }
 
                 {
                     b := New(Behavior_Idle);
                     b.animation = idle;
 
-                    b.minimum_duration = 3;
-                    b.likelihood = 0.2;
+                    b.minimum_duration = 10;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -879,9 +1050,6 @@ initialize :: (game: *Game) {
                     b.idle_animation = idle;
 
                     b.minimum_duration = 10;
-                    b.likelihood = 0.8;
-
-                    b.speed = 25;
 
                     array_add(*neutral_behaviors, xx b);
                 }
@@ -893,13 +1061,13 @@ initialize :: (game: *Game) {
                 }
 
                 {
-                    shock_behavior = xx New(Behavior_One_Shot);
+                    shock_behavior = xx New(Behavior_React);
                     using shock_behavior;
                     animation = shock;
                 }
 
                 {
-                    heart_behavior = xx New(Behavior_One_Shot);
+                    heart_behavior = xx New(Behavior_React);
                     using heart_behavior;
                     animation = heart;
                 }
@@ -910,11 +1078,13 @@ initialize :: (game: *Game) {
                     animation = idle;
                 }
 
+                animation = idle;
+
                 {
                     schedule.hours = Plan.[
                         .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, 
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
+                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
                     ];
                 }
             }
@@ -922,637 +1092,24 @@ initialize :: (game: *Game) {
             {
                 using biography;
 
-                array_add(*facts, "crab likes to");
-                array_add(*facts, "hang out in the sand.");
-                array_add(*facts, "");
-                array_add(*facts, "cannot be harmed by");
-                array_add(*facts, "physical means.");
+                // @TODO
+                //array_add(*facts, "");
+
+                quote = "sup";
 
                 color = orange;
             }
         }
 
-        turtle : *Guy = xx new_entity(.GUY);
-        {
-            using turtle;
-
-            name = "turtle";
-
-            rarity = .RARE;
-
-            x = 128;
-            y = 48;
-            width  = 12;
-            height = 12;
-
-            directionality = .FOUR_WAY;
-
-            {
-                using personality;
-
-                idle := make_animation("Turtle-Idle",     speed = 3.0);
-                cardinal := make_animation("Turtle-Cardinal",     speed = 3.0);
-                diagonal := make_animation("Turtle-Diagonal",     speed = 3.0);
-                heart := make_animation("Turtle-Heart",   speed = 1.0);
-                shock := make_animation("Turtle-Shock",   speed = 10.0);
-                sleep := make_animation("Turtle-Sleep",   speed = 3.0);
-
-                animation = cardinal;
-
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.3;
-
-                    b.swimming = true;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-
-                {
-                    b := New(Behavior_Eight_Way);
-                    b.animation = cardinal;
-                    b.diagonal_animation = diagonal;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.7;
-
-                    b.swimming = true;
-                    b.bouncy_x = true;
-                    b.bouncy_y = true;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = sleep;
-
-                    swimming = true;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = shock;
-
-                    swimming = true;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = heart;
-
-                    swimming = true;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-
-                    swimming = true;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP, .SLEEP,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, "I");
-                array_add(*facts, "love");
-                array_add(*facts, "turtles");
-                array_add(*facts, "!");
-
-                color = brown;
-            }
-        }
-
-        axolotl : *Guy = xx new_entity(.GUY);
-        {
-            using axolotl;
-
-            name = "axolotl";
-
-            rarity = .RARE;
-
-            x = 72;
-            y = 16;
-            width  = 12;
-            height = 8;
-
-            {
-                using personality;
-
-                idle    := make_animation("Axolotl-Idle",   speed = 4.0);
-                walk    := make_animation("Axolotl-Walk",   speed = 10.0);
-                flote   := make_animation("Axolotl-Float",  speed = 8.0);
-                stand   := make_animation("Axolotl-Stand",  speed = 3.0);
-                sit     := make_animation("Axolotl-Sit",    speed = 1.0);
-                roll    := make_animation("Axolotl-Roll",   speed = 6.0);
-
-                swim_up     := make_animation("Axolotl-Swim-Up",  speed = 7.0);
-                swim_down   := make_animation("Axolotl-Swim-Down",  speed = 7.0);
-
-                eat     := make_animation("Axolotl-Eat",    speed = 4.0);
-                sleep   := make_animation("Axolotl-Sleep",  speed = 4.0);
-                heart   := make_animation("Axolotl-Heart",  speed = 4.0);
-
-                animation = idle;
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = sit;
-
-                    b.minimum_duration = 4;
-                    b.likelihood = 0.3;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = stand;
-
-                    b.minimum_duration = 4;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = eat;
-
-                    b.minimum_duration = 20;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Wander_Floor);
-                    b.animation = walk;
-                    b.idle_animation = idle;
-
-                    b.bouncy_x = true;
-
-                    b.speed = 20;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Forward);
-                    b.animation = roll;
-
-                    b.speed = 10.0;
-
-                    b.bouncy_x = true;
-
-                    b.minimum_duration = 10;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Swim);
-                    b.animation = swim_up;
-                    b.down_animation = swim_down;
-
-                    b.speed = 25;
-
-                    b.swimming = true;
-                    b.bouncy_x = true;
-                    b.bouncy_y = true;
-
-                    b.minimum_duration = 20;
-                    b.likelihood = 0.2;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = sleep;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = idle;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = heart;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .SLEEP, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, "like an underwater dog.");
-                array_add(*facts, "(does not know any tricks)");
-                array_add(*facts, "");
-                array_add(*facts, "Can regenerate its limbs");
-                array_add(*facts, "I think.");
-
-                color = pink;
-            }
-        }
-
-        star : *Guy = xx new_entity(.GUY);
-        {
-            using star;
-
-            name = "star";
-
-            rarity = .RARE;
-
-            x = 96;
-            y = 16;
-            width  = 12;
-            height = 4;
-
-            {
-                using personality;
-
-                idle    := make_animation("Star-Idle",   speed = 4.0);
-                kick    := make_animation("Star-Kick",   speed = 8.0);
-
-                shock   := make_animation("Star-Shock",  speed = 8.0);
-                yawn    := make_animation("Star-Yawn",   speed = 5.0);
-                heart   := make_animation("Star-Heart",  speed = 8.0);
-
-                animation = idle;
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 0.9;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = kick;
-
-                    b.minimum_duration = 3;
-                    b.likelihood = 0.1;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = yawn;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = shock;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = heart;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, "The star of the show.");
-
-                color = pink;
-            }
-        }
-
-        dumbo : *Guy = xx new_entity(.GUY);
-        {
-            using dumbo;
-
-            name = "dumbo";
-
-            rarity = .RARE;
-
-            x = 96;
-            y = 80;
-            width  = 8;
-            height = 8;
-
-            {
-                using personality;
-
-                idle    := make_animation("Dumbo-Idle",     speed = 4.0);
-
-                animation = idle;
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 1.0;
-
-                    b.swimming = true;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = idle;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = idle;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = idle;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, ":.");
-
-                color = yellow;
-            }
-        }
-
-        angler : *Guy = xx new_entity(.GUY);
-        {
-            using angler;
-
-            name = "angler";
-
-            rarity = .RARE;
-
-            x = 120;
-            y = 72;
-            width  = 14;
-            height = 14;
-
-            {
-                using personality;
-
-                idle    := make_animation("Angler-Idle",     speed = 4.0);
-
-                animation = idle;
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 1.0;
-
-                    b.swimming = true;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = idle;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = idle;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = idle;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, "he will eat you!");
-                array_add(*facts, "but will apologize after...");
-
-                color = blue;
-            }
-        }
-
-        narwhal : *Guy = xx new_entity(.GUY);
-        {
-            using narwhal;
-
-            name = "narwhal";
-
-            rarity = .RARE;
-
-            x = 64;
-            y = 96;
-            width  = 26;
-            height = 12;
-
-            {
-                using personality;
-
-                idle    := make_animation("Narwhal-Idle",     speed = 2.0);
-
-                animation = idle;
-
-                {
-                    b := New(Behavior_Idle);
-                    b.animation = idle;
-
-                    b.minimum_duration = 5;
-                    b.likelihood = 1.0;
-
-                    b.swimming = true;
-
-                    array_add(*neutral_behaviors, xx b);
-                }
-
-                {
-                    sleep_behavior = xx New(Behavior_Sleep);
-                    using sleep_behavior;
-                    animation = idle;
-                }
-
-                {
-                    shock_behavior = xx New(Behavior_One_Shot);
-                    using shock_behavior;
-                    animation = idle;
-                }
-
-                {
-                    heart_behavior = xx New(Behavior_One_Shot);
-                    using heart_behavior;
-                    animation = idle;
-                }
-
-                {
-                    eat_behavior = xx New(Behavior_Eat);
-                    using eat_behavior;
-                    animation = idle;
-                }
-
-                {
-                    schedule.hours = Plan.[
-                        .SLEEP, .SLEEP, .SLEEP, .NEUTRAL, .SLEEP, .SLEEP, .SLEEP, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL,
-                        .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .NEUTRAL, .SLEEP,
-                    ];
-                }
-            }
-
-            {
-                using biography;
-
-                array_add(*facts, "swimming in the ocean");
-                array_add(*facts, "causing a commotion");
-                array_add(*facts, "cause it is so awesome");
-
-                color = white;
-            }
-        }
-
-
-        // Add all the guys defined here to the list of guys who can be populated.
         {
             array_add(*game.guys, frog);
             array_add(*game.guys, tako);
             array_add(*game.guys, clam);
-            array_add(*game.guys, crab);
             array_add(*game.guys, jelly);
             array_add(*game.guys, blowfish);
-            array_add(*game.guys, turtle);
-            array_add(*game.guys, axolotl);
-
-            /*
-            // v1.1
-            array_add(*game.guys, star);
-            array_add(*game.guys, dumbo);
-            array_add(*game.guys, narwhal);
-            array_add(*game.guys, angler);
             array_add(*game.guys, blob);
-            */
+            array_add(*game.guys, crab);
         }
-
-        /*
-        // Validate some stuff about these guys
-        {
-            for guy : game.guys {
-                // Neutral behavior likelihoods must add up to 1.
-                {
-                    total := 0.0;
-                    for behavior : guy.personality.neutral_behaviors  total += behavior.likelihood;
-                    assert(total == 1.0);
-                }
-            }
-        }
-        */
 
         genocide(game);
 
@@ -1599,7 +1156,7 @@ generate_seed_from_date_and_hour :: () -> Random_State {
     random_state : Random_State;
 
     t := time();
-    seed : u64 = cast(u64)t.hour - 1 + (cast(u64)t.day_of_week_starting_at_0 << 8);
+    seed : u64 = cast(u64)t.hour + (cast(u64)t.day_of_week_starting_at_0 << 8);
 
     random_seed(*random_state, seed);
 

@@ -14,30 +14,20 @@ simulate_interactions :: (game: *Game) {
 
     if mouse_active {
         hover_guy : *Guy;
-        if game.focused_guy {
-            hover_guy = game.focused_guy;
-        }
-        else {
-            for game.entities {
-                if it.kind != .GUY then continue;
-                guy := cast(*Guy)it;
-                if within(mouse_position, guy.collider) {
-                    hover_guy = guy;
-                    // @TODO: Resolve z collisions properly.
-                }
+        for game.entities {
+            if it.kind != .GUY then continue;
+            guy := cast(*Guy)it;
+            if within(mouse_position, guy.collider) {
+                hover_guy = guy;
+                // @TODO: Resolve z collisions properly.
             }
         }
 
-        if hover_guy {
+        if hover_guy && !game.focused_guy {
             if left_mouse.just_pressed {
                 if #complete game.cursor.state == {
                     case .NEUTRAL; {
-                        if game.focused_guy {
-                            game.focused_guy = null;
-                        }
-                        else {
-                            game.focused_guy = hover_guy;
-                        }
+                        game.focused_guy = hover_guy;
                     }
                     case .PET; {
                         play_sfx("smooch");
@@ -54,6 +44,16 @@ simulate_interactions :: (game: *Game) {
                 }
             }
         }
+        else {
+            if left_mouse.just_pressed {
+                game.focused_guy = null;
+            }
+        }
+    }
+
+    if north.just_pressed {
+        play_sfx("thunder");
+        shock_everyone(game);
     }
 }
 

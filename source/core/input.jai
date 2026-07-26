@@ -29,8 +29,10 @@ post_frame_update :: (input: *Input) {
     update(*input.left);
     update(*input.down);
     update(*input.right);
-    update(*input.a);
-    update(*input.b);
+    update(*input.north);
+    update(*input.south);
+    update(*input.east);
+    update(*input.west);
     update(*input.start);
     update(*input.select);
 
@@ -46,8 +48,10 @@ Input :: struct {
     down    : Button;
     right   : Button;
 
-    a       : Button;
-    b       : Button;
+    north   : Button;
+    south   : Button;
+    east    : Button;
+    west    : Button;
 
     start   : Button;
     select  : Button;
@@ -77,8 +81,10 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
                     if event.key.keysym.sym == SDLK_s       release(*input.down);
                     if event.key.keysym.sym == SDLK_d       release(*input.right);
 
-                    if event.key.keysym.sym == SDLK_j       release(*input.a);
-                    if event.key.keysym.sym == SDLK_k       release(*input.b);
+                    if event.key.keysym.sym == SDLK_h       release(*input.south);
+                    if event.key.keysym.sym == SDLK_j       release(*input.east);
+                    if event.key.keysym.sym == SDLK_k       release(*input.west);
+                    if event.key.keysym.sym == SDLK_l       release(*input.north);
 
                     if event.key.keysym.sym == SDLK_ESCAPE  release(*input.start);
                     if event.key.keysym.sym == SDLK_RETURN  release(*input.select);
@@ -96,8 +102,10 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
                     if event.key.keysym.sym == SDLK_s       press(*input.down);
                     if event.key.keysym.sym == SDLK_d       press(*input.right);
 
-                    if event.key.keysym.sym == SDLK_j       press(*input.a);
-                    if event.key.keysym.sym == SDLK_k       press(*input.b);
+                    if event.key.keysym.sym == SDLK_h       press(*input.south);
+                    if event.key.keysym.sym == SDLK_j       press(*input.east);
+                    if event.key.keysym.sym == SDLK_k       press(*input.west);
+                    if event.key.keysym.sym == SDLK_l       press(*input.north);
 
                     if event.key.keysym.sym == SDLK_ESCAPE  press(*input.start);
                     if event.key.keysym.sym == SDLK_RETURN  press(*input.select);
@@ -105,13 +113,6 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
 
                 // Development keybinds
                 {
-                    if event.key.keysym.sym == SDLK_x {
-                        genocide(*game);
-                        seed := generate_seed();
-                        populate(*game, seed);
-                    }
-
-                    /*
                     if event.key.keysym.sym == SDLK_r {
                         if program_state.current_scene == {
                             case .GAME;
@@ -139,7 +140,6 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
                     if event.key.keysym.sym == SDLK_2 {
                         program_state.simulation_state.step = true;
                     }
-                    */
                 }
 
             case SDL_MOUSEBUTTONDOWN;
@@ -186,14 +186,18 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
                 // 6, 7 : select / start
                 // 8, 9 : pressing in left stick / right stick
 
-                if event.jbutton.button == 1 then press(*input.a); 
-                if event.jbutton.button == 2 then press(*input.b);
+                if event.jbutton.button == 0 then press(*input.south);
+                if event.jbutton.button == 1 then press(*input.east); 
+                if event.jbutton.button == 2 then press(*input.west);
+                if event.jbutton.button == 3 then press(*input.north);
                 if event.jbutton.button == 6 then press(*input.start);
                 if event.jbutton.button == 7 then press(*input.select);
 
             case SDL_JOYBUTTONUP;
-                if event.jbutton.button == 1 then release(*input.a); 
-                if event.jbutton.button == 2 then release(*input.b);
+                if event.jbutton.button == 0 then release(*input.south);
+                if event.jbutton.button == 1 then release(*input.east); 
+                if event.jbutton.button == 2 then release(*input.west);
+                if event.jbutton.button == 3 then release(*input.north);
                 if event.jbutton.button == 6 then release(*input.start);
                 if event.jbutton.button == 7 then release(*input.select);
 
@@ -220,15 +224,13 @@ gather_input :: (input: *Input, gamepad: *SDL_Joystick) {
                         graphics_context.window_width  = event.window.data1;
                         graphics_context.window_height = event.window.data2;
 
-                        aspect_ratio := cast(float)graphics_context.window_width / cast(float)graphics_context.window_height;
-
-                        if aspect_ratio < SCREEN_ASPECT_RATIO {
+                        #if GAME_ASPECT_RATIO > SCREEN_ASPECT_RATIO {
                             graphics_context.viewport_width = graphics_context.window_width;
-                            graphics_context.viewport_height  = cast(s32)(graphics_context.viewport_width / SCREEN_ASPECT_RATIO);
+                            graphics_context.viewport_height  = cast(s32)(graphics_context.viewport_width / GAME_ASPECT_RATIO);
                         }
                         else {
                             graphics_context.viewport_height = graphics_context.window_height;
-                            graphics_context.viewport_width  = cast(s32)(graphics_context.viewport_height * SCREEN_ASPECT_RATIO);
+                            graphics_context.viewport_width  = cast(s32)(graphics_context.viewport_height * GAME_ASPECT_RATIO);
                         }
                     }
 

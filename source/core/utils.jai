@@ -17,9 +17,6 @@ Pair :: struct {
 to_pair :: (vec: Vector2) -> Pair {
     return .{xx vec.x, xx vec.y};
 }
-to_vector :: (pair: Pair) -> Vector2 {
-    return .{xx pair.x, xx pair.y};
-}
 operator + :: (a: Pair, b: Pair) -> Pair { return .{a.x + b.x, a.y + b.y};  }
 operator - :: (a: Pair, b: Pair) -> Pair { return .{a.x - b.x, a.y - b.y};  }
 operator * :: (f: int, a: Pair)  -> Pair { return .{a.x * f,   a.y * f};    }

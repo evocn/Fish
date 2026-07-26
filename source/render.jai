@@ -14,7 +14,6 @@ render :: (game: Game, menu: Menu) {
             case .TITLE;
                 draw_title_screen();
                 draw_version_indicator();
-                draw_controls();
 
             case .GAME;
                 draw_game(game);
@@ -22,9 +21,8 @@ render :: (game: Game, menu: Menu) {
 
             case .MENU;
                 draw_menu(menu);
-                draw_title_screen();
                 draw_version_indicator();
-                draw_controls();
+                draw_title_screen();
 
             case .EDITOR;
                 draw_game(game);
@@ -69,6 +67,18 @@ draw_user_interface :: (game: Game) {
 
             k += 16;
 
+            draw_text(
+                tprint("\"%\"", quote),
+                x = text_start_x,
+                y = text_start_y - k,
+                alignment   = Alignment.LEFT,
+                progress    = -1,
+                font        = .MAIN,
+                color       = color,
+            );
+
+            k += 16;
+
             for fact : facts {
                 draw_text(
                     fact,
@@ -84,13 +94,11 @@ draw_user_interface :: (game: Game) {
             }
 
         }
-
-        draw_mouse_cursor(.{PIXEL_WIDTH / 2 + 16, 16}, game.cursor.state);
     }
 }
 
 draw_mouse_cursor :: (position : Pair, cursor_state: Cursor_State) {
-    sprite := table_find_pointer(*graphics_context.sheets, "Cursor");
+    sprite := table_find_pointer(*graphics_context.sheets, "cursor");
     if !sprite {
         log_error("Couldn't load cursor spritesheet.\n");
         return;
@@ -119,33 +127,23 @@ draw_mouse_cursor :: (position : Pair, cursor_state: Cursor_State) {
 
 draw_title_screen :: () {
     draw_text(
-        "Fish Tank",
-        x = PIXEL_WIDTH - 10,
+        "June's Fish Tank",
+        x = PIXEL_WIDTH / 2,
         y = 80,
-        alignment   = Alignment.RIGHT,
+        alignment   = Alignment.CENTER,
         progress    = -1,
         font        = .MAIN,
         color       = blue,
     );
 
     draw_text(
-        "Showcase mode",
-        x = PIXEL_WIDTH - 10,
-        y = 60,
-        alignment   = Alignment.RIGHT,
+        "A dream fulfilled!",
+        x = PIXEL_WIDTH / 2,
+        y = 50,
+        alignment   = Alignment.CENTER,
         progress    = -1,
         font        = .SMALL,
         color       = yellow,
-    );
-
-    draw_text(
-        "March 2025",
-        x = PIXEL_WIDTH - 10,
-        y = 40,
-        alignment   = Alignment.RIGHT,
-        progress    = -1,
-        font        = .SMALL,
-        color       = gray,
     );
 }
 
@@ -161,74 +159,9 @@ draw_version_indicator :: () {
     );
 }
 
-draw_controls :: () {
-    draw_text(
-        "Mouse to select",
-        x = 3,
-        y = 30,
-        alignment   = Alignment.LEFT,
-        progress    = -1,
-        font        = .SMALL,
-        color       = gray,
-    );
-
-    draw_text(
-        "A/W/D + click for interaction",
-        x = 3,
-        y = 20,
-        alignment   = Alignment.LEFT,
-        progress    = -1,
-        font        = .SMALL,
-        color       = gray,
-    );
-
-    draw_text(
-        "click to start!",
-        x = 3,
-        y = 10,
-        alignment   = Alignment.LEFT,
-        progress    = -1,
-        font        = .SMALL,
-        color       = white,
-    );
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-
 draw_game :: (game : Game) {
-    {
-        sprite := table_find_pointer(*graphics_context.sheets, "Foliage");
-        if !sprite then log_error("Couldn't load foliage spritesheet.\n");
-
-        draw_sprite(
-            sprite,
-            frame = 0,
-            pixel = world_space_to_screen_pixel(0, 0),
-
-            scale_factor = screen_pixel_zoom(),
-
-            horizontal_flip = false,
-            use_color_override = false,
-        );
-    }
-
-    // Z Sort entities
-    {
-        comparison :: (a: *Entity, b: *Entity) -> int { 
-            if a.z_index > b.z_index        return 1;
-            else if a.z_index < b.z_index   return -1;
-            else return b.id - a.id;
-        }
-        quick_sort(game.entities, comparison);
-    }
-
-    // Draw Entities behind stage
-    for entity : game.entities {
-        if entity.z_index > 0 then break;
-        draw(entity);
-    }
-
     // Draw Level
     for tile, index : game.level.tiles {
         if tile.kind == .EMPTY then continue;
@@ -244,10 +177,21 @@ draw_game :: (game : Game) {
         draw_tile(tile, pixel);
     }
 
-    // Draw Entities in front of stage
-    for entity : game.entities {
-        if entity.z_index < 0 then continue;
-        draw(entity);
+    // Draw Entities
+    {
+        // Z Sort em real quick
+        {
+            comparison :: (a: *Entity, b: *Entity) -> int { 
+                if a.z_index > b.z_index        return 1;
+                else if a.z_index < b.z_index   return -1;
+                else return b.id - a.id;
+            }
+            quick_sort(game.entities, comparison);
+        }
+
+        for entity : game.entities {
+            draw(entity);
+        }
     }
 
 

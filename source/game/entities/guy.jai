@@ -18,19 +18,14 @@ Guy :: struct {
 
     biography : Biography;
 
-    directionality : enum {
-        LEFT_RIGHT;
-        FOUR_WAY;
-    }
-
     // State
     facing_left : bool;     @NoSerialize
-    facing_down : bool;     @NoSerialize
     velocity    : Vector2;  @NoSerialize
-    grounded    : bool = true;
 }
 
 initialize :: (using guy: *Guy) {
+    facing_left = false;
+    velocity = .{};
 }
 
 update :: (using guy: *Guy, dt: float) {
@@ -39,36 +34,14 @@ update :: (using guy: *Guy, dt: float) {
         update(*personality, guy, dt);
 
         update_from_gravity :: (using guy: *Guy, dt: float) {
-            previously_grounded := grounded;
+            grounded := check_if_grounded(*guy.actor);
+            if grounded then return;
 
-            grounded = check_if_grounded(*guy.actor);
-            if !grounded {
-                guy.velocity.y += game.GRAVITY * dt;
-            }
-
-            // @HACK
-            if grounded && !previously_grounded && guy.y < 32 {
-                a: Allocator;
-                a.proc = flat_pool_allocator_proc;
-                a.data = *game.arena;
-                new_sys := make_dust_cloud(bottom_middle_of_collider(guy.collider),, a);
-                array_add(*game.entities, xx new_sys);
-            }
+            guy.velocity.y += game.GRAVITY * dt;
         }
 
         if !personality.current_whim.swimming {
             update_from_gravity(guy, dt);
-        }
-    }
-
-    // jet streams
-    {
-        for entity : game.entities {
-            if entity.kind != .JET continue;
-            jet := cast(*Jet)entity;
-            if collision(collider, jet.collider) {
-                guy.velocity.y += jet.acceleration;
-            }
         }
     }
 
@@ -96,13 +69,11 @@ update :: (using guy: *Guy, dt: float) {
 
     update_visuals :: (using guy: *Guy, dt: float) {
         // Facing direction
-        if directionality == {
-            case .LEFT_RIGHT;
-                facing_left = velocity.x < 0;
-
-            case .FOUR_WAY;
-                facing_left = velocity.x > 0;
-                facing_down = velocity.y > 0;
+        if velocity.x < 0.0 {
+            facing_left = true;
+        }
+        else if velocity.x > 0.0 {
+            facing_left = false;
         }
     }
     update_visuals(guy, dt);
@@ -110,7 +81,7 @@ update :: (using guy: *Guy, dt: float) {
 
 draw :: (using guy: *Guy) {
     draw_sprite_relative_to_collider(
-        collider, animation.sheet, animation.frame, facing_left, facing_down,
+        collider, animation.sheet, animation.frame, facing_left
     );
 }
 
@@ -144,9 +115,9 @@ Rarity :: enum #complete {
 // Tweakable!
 get_probability :: (rarity: Rarity) -> float {
     if #complete rarity == {
-        case .COMMON; return 0.80;
-        case .RARE;   return 0.60;
-        case .MYTHIC; return 0.40;
+        case .COMMON; return 0.40;
+        case .RARE;   return 0.25;
+        case .MYTHIC; return 0.10;
     }
 }
 
@@ -154,6 +125,7 @@ get_probability :: (rarity: Rarity) -> float {
 
 Biography :: struct {
     facts : [..] string;
+    quote : string;
 
     color : Color = white;
 }

@@ -3,7 +3,7 @@
 // February 2024
 
 using program_state : struct {
-    VERSION :: "1.0";
+    VERSION :: "0.04a";
     DEBUG_MEMORY :: true;
 
     mode : enum {
@@ -31,7 +31,7 @@ using program_state : struct {
 
     running := true;
 
-    current_scene : Scene = .TITLE;
+    current_scene : Scene = .GAME;
     prior_scene : Scene;
 
     framerate : float;

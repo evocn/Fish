@@ -2,16 +2,8 @@
 // Main
 // September 2024
 
-get_music_for_the_hour :: (hour: int) -> string {
-    if      hour < 8  then return "12am";
-    else if hour < 12 then return "8am";
-    else if hour < 18 then return "12pm";
-    else if hour < 23 then return "6pm";
-    else return "bach";
-}
-
 main :: () {
-    random_seed(cast,force(u64)current_time_monotonic().low);
+    random_seed(xx current_time_monotonic());
 
     initialize_everything();
 
@@ -24,44 +16,11 @@ main :: () {
     a.data = *game.arena;
     initialize(*game,, allocator=a);
 
-    song : string;
-    last_frame_hour : int;
-
-    {
-        hour := time().hour;
-        last_frame_hour = hour;
-
-        song = get_music_for_the_hour(hour);
-        print("Playing song called \"%\"\n", song);
-        play_music(song);
-    }
-
     dt, last_frame := 0.0;
     while program_state.running {
         ////////////////////////////////////////////////////////////////////////////////
         // Frame Startup
         {
-            hour := time().hour;
-            if hour != last_frame_hour {
-                // Select music for the hour
-                {
-                    new_song := get_music_for_the_hour(hour);
-                    if new_song != song {
-                        song = new_song;
-                        print("Playing song called \"%\"\n", song);
-                        play_music(song);
-                    }
-                }
-
-                // @TODO: Make particles get smaller at night and bigger in day
-                {
-                    //set_particle_state_by_the_hour(hour);
-
-                    // and bubbles
-
-                }
-            }
-
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -76,8 +35,18 @@ main :: () {
             // Dispatch Inputs based on program state
             if #complete program_state.current_scene == {
                 case .TITLE;
-                    if game.player.input.a.just_pressed || game.player.input.left_mouse.just_pressed {
+                    if game.player.input.south.just_pressed {
                         switch_scene(.GAME);
+
+                        // @TODO: Switch as the hour goes by too!
+                        get_music_for_the_hour :: () -> string {
+                            hour := time().hour;
+                            if hour < 7 || hour > 18 then return "sleep";
+                            else if hour > 12 then return "nagata";
+                            else if hour < 12 then return "bach";
+                            else return "nagata";
+                        }
+                        play_music(get_music_for_the_hour());
                     }
 
                 case .MENU;
@@ -136,11 +105,7 @@ main :: () {
         ////////////////////////////////////////////////////////////////////////////////
         // Frame Cleanup
         {
-            Sound_Player.update();
-
-            for entity : game.entities {
-                if entity.should_die then remove entity;
-            }
+            Sound.update();
 
             current_time := cast(float32)seconds_since_init();
             dt = current_time - last_frame;
@@ -174,7 +139,7 @@ using Basic :: #import "Basic"()(MEMORY_DEBUGGER=DEBUG_MEMORY);
 #import "stb_image";
 #import "freetype-2.12.1";
 ImGui :: #import "ImGui";
-using Sound_Player :: #import "Sound_Player";
+using Sound :: #import "Sound_Player";
 
 
 ////////////////////////////////////////////////////////////////////////////////
